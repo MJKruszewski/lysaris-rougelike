@@ -1,0 +1,6 @@
+./build
+./dist
+./.idea
+*.iml
+./.vscode
+./src/assets/*
