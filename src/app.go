@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/gookit/event"
 	"main/config"
+	"main/events"
 	"main/game"
 	ui2 "main/ui"
+	game2 "main/ui/game"
 	"math/rand"
 	"time"
 )
@@ -23,53 +26,35 @@ func main() {
 	mapper := game.Mapper{}
 	gameMap := mapper.GenerateMap(100, 100)
 	player := game.Player{
-		X: len(gameMap) / 2,
-		Y: len(gameMap[0]) / 2,
+		X: len(gameMap.Tiles) / 2,
+		Y: len(gameMap.Tiles[0]) / 2,
 	}
 
-	ui := []ui2.DrawInterface{
-		&ui2.LeftPanel{},
-		&ui2.BottomPanel{},
-		&ui2.Map{
-			CurrentMap: gameMap,
-			Player:     &player,
-		},
-	}
+	window := ui2.NewWindow()
+	window.AddPanel(&game2.LeftPanel{})
+	window.AddPanel(&game2.BottomPanel{})
+	window.AddPanel(&game2.Map{
+		CurrentMap: &gameMap,
+		Player:     &player,
+	})
+
+	event.On(events.KeyPressed, event.ListenerFunc(player.KeyPressedSubscriber), event.Normal)
 
 	for !rl.WindowShouldClose() {
 		resizeWindow()
 
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.Black)
+		//rl.ClearBackground(rl.Black)
 
-		for _, drawInterface := range ui {
-			drawInterface.Draw()
+		for _, drawInterface := range window.GetPanels() {
+			(*drawInterface).Draw()
 		}
+
 		rl.EndDrawing()
 
 		keyPressed := rl.GetKeyPressed()
 		for keyPressed > 0 {
-			fmt.Println("Event | pressed key", keyPressed)
-
-			switch keyPressed {
-			case rl.KeyUp:
-				if player.Y == 0 {
-					break
-				}
-
-				player.Y--
-			case rl.KeyDown:
-				player.Y++
-			case rl.KeyLeft:
-				if player.X == 0 {
-					break
-				}
-
-				player.X--
-			case rl.KeyRight:
-				player.X++
-			}
-
+			event.MustFire(events.KeyPressed, event.M{"key": keyPressed, "map": gameMap})
 			keyPressed = rl.GetKeyPressed()
 		}
 

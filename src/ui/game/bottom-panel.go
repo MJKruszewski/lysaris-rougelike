@@ -1,13 +1,15 @@
-package ui
+package game
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"image/color"
 	"main/config"
+	"main/ui"
 )
 
 type BottomPanel struct {
-	DrawInterface
+	ui.DrawInterface
+	window *ui.Window
 }
 
 func (m *BottomPanel) Draw() {
@@ -21,4 +23,8 @@ func (m *BottomPanel) Draw() {
 			A: 255,
 		},
 	)
+}
+
+func (m *BottomPanel) SetWindow(window *ui.Window) {
+	m.window = window
 }

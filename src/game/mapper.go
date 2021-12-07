@@ -56,7 +56,7 @@ var symbols = []string{
 	"\"",
 }
 
-func (m Mapper) GenerateMap(w int, h int) [][]Tile {
+func (m *Mapper) GenerateMap(w int, h int) Map {
 	result := make([][]Tile, w)
 
 	for i := 0; i < w; i++ {
@@ -72,5 +72,7 @@ func (m Mapper) GenerateMap(w int, h int) [][]Tile {
 		}
 	}
 
-	return result
+	return Map{
+		Tiles: result,
+	}
 }

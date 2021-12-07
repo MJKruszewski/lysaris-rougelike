@@ -1,45 +1,21 @@
-package ui
+package game
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"image/color"
 	"main/config"
 	"main/game"
+	"main/ui"
 )
 
 type Map struct {
-	DrawInterface
-	CurrentMap [][]game.Tile
+	ui.DrawInterface
+	CurrentMap *game.Map
 	Player     *game.Player
+	window     *ui.Window
 }
 
 var size = rl.Vector2{X: float32(config.GlobalConfig.TileSize), Y: float32(config.GlobalConfig.TileSize)}
-var colors = []color.RGBA{
-	color.RGBA{
-		R: 27,
-		G: 138,
-		B: 39,
-		A: 255,
-	},
-	color.RGBA{
-		R: 138,
-		G: 138,
-		B: 39,
-		A: 255,
-	},
-	color.RGBA{
-		R: 27,
-		G: 138,
-		B: 138,
-		A: 255,
-	},
-	color.RGBA{
-		R: 27,
-		G: 27,
-		B: 39,
-		A: 255,
-	},
-}
 var textOffset = int32(config.GlobalConfig.TileSize/2 - 1)
 var black = color.RGBA{
 	R: 0,
@@ -55,17 +31,21 @@ func (m *Map) Draw() {
 		black,
 	)
 
-	startRow := m.Player.X
-	startCol := m.Player.Y
+	xSize := config.GlobalConfig.MapPanelDim.Width / config.GlobalConfig.TileSize
+	ySize := config.GlobalConfig.MapPanelDim.Height / config.GlobalConfig.TileSize
 
-	for x := 0; x < config.GlobalConfig.MapPanelDim.Width/config.GlobalConfig.TileSize; x++ {
-		startCol = m.Player.Y
-		for y := 0; y < config.GlobalConfig.MapPanelDim.Height/config.GlobalConfig.TileSize; y++ {
+	startRow := m.Player.X - (xSize / 2)
+	startCol := m.Player.Y - (ySize / 2)
 
-			if startRow >= len(m.CurrentMap) || startCol >= len(m.CurrentMap[startRow]) {
-				return
+	for x := 0; x < xSize; x++ {
+		startCol = m.Player.Y - (ySize / 2)
+		for y := 0; y < ySize; y++ {
+
+			if startRow < 0 || startCol < 0 || startRow >= len(m.CurrentMap.Tiles) || startCol >= len(m.CurrentMap.Tiles[startRow]) {
+				startCol++
+				continue
 			}
-			tile := m.CurrentMap[startRow][startCol]
+			tile := m.CurrentMap.Tiles[startRow][startCol]
 
 			destX := m.calculateXPos(x, 0)
 			destY := m.calculateYPos(y, 0)
@@ -78,8 +58,7 @@ func (m *Map) Draw() {
 		startRow++
 	}
 
-	//todo adjust to allow move to corers
-	rl.DrawText("@", int32(m.calculateXPos(config.GlobalConfig.MapPanelDim.Width/config.GlobalConfig.TileSize/2, 0))+textOffset, int32(m.calculateYPos(config.GlobalConfig.MapPanelDim.Height/config.GlobalConfig.TileSize/2, 0))+textOffset, int32(config.GlobalConfig.TileFontSize), black)
+	rl.DrawText("@", int32(m.calculateXPos(xSize/2, 0))+textOffset, int32(m.calculateYPos(ySize/2, 0))+textOffset, int32(config.GlobalConfig.TileFontSize), black)
 }
 
 func (m *Map) calculateYPos(y int, startPosition int) float32 {
@@ -90,9 +69,6 @@ func (m *Map) calculateXPos(x int, startPosition int) float32 {
 	return ((float32(x) - float32(startPosition)) * float32(config.GlobalConfig.TileSize)) + float32(config.GlobalConfig.MapPanelDim.OffsetX)
 }
 
-//  0 1 2 3 4 5 6
-//0 x x x x x x x
-//1 x x x x x x x
-//2 x x x y x x x
-//3 x x x x x x x
-//4 x x x x x x x
+func (m *Map) SetWindow(window *ui.Window) {
+	m.window = window
+}
