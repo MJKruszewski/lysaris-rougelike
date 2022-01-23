@@ -4,12 +4,14 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"image/color"
 	"main/config"
+	"main/game/message"
 	"main/ui"
 )
 
 type BottomPanel struct {
 	ui.DrawInterface
-	window *ui.Window
+	window     *ui.Window
+	MessageLog *message.MessageLog
 }
 
 func (m *BottomPanel) Draw() {
@@ -23,6 +25,18 @@ func (m *BottomPanel) Draw() {
 			A: 255,
 		},
 	)
+
+	i := 0
+	for _, msg := range m.MessageLog.GetMessages() {
+		rl.DrawText(
+			msg.Time+": "+msg.Content,
+			int32(config.GlobalConfig.BottomPanelDim.OffsetX+10),
+			int32(config.GlobalConfig.BottomPanelDim.OffsetY+10+(config.GlobalConfig.TileSize*i)),
+			int32(config.GlobalConfig.TileFontSize),
+			black,
+		)
+		i++
+	}
 
 	rl.DrawLine(
 		int32(config.GlobalConfig.BottomPanelDim.OffsetX),

@@ -1,8 +1,11 @@
 package mapElements
 
 import (
+	"github.com/gookit/event"
 	"image/color"
+	"main/events"
 	"main/game/entites"
+	"main/game/message"
 	"math/rand"
 )
 
@@ -38,6 +41,11 @@ func MakeWater(x int, y int) WaterTile {
 }
 
 func (t WaterTile) IsMovableTo(movable entites.Movable) bool {
+	event.MustFire(events.AddMessageLog, event.M{"message": message.Message{
+		Time:    "12:00",
+		Content: "You cannot swim...",
+	}})
+
 	return movable.IsAbleTo(entites.Swim) || movable.IsAbleTo(entites.Fly)
 }
 

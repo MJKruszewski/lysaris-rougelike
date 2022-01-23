@@ -7,6 +7,7 @@ import (
 	"main/config"
 	"main/events"
 	"main/game"
+	"main/game/message"
 	ui2 "main/ui"
 	game2 "main/ui/game"
 	"math/rand"
@@ -29,10 +30,13 @@ func main() {
 		X: len(gameMap.Tiles) / 2,
 		Y: len(gameMap.Tiles[0]) / 2,
 	}
+	messageLog := message.MessageLog{}
 
 	window := ui2.NewWindow()
 	window.AddPanel(&game2.LeftPanel{})
-	window.AddPanel(&game2.BottomPanel{})
+	window.AddPanel(&game2.BottomPanel{
+		MessageLog: &messageLog,
+	})
 	window.AddPanel(&game2.Map{
 		CurrentMap: &gameMap,
 		Player:     &player,
@@ -42,6 +46,7 @@ func main() {
 	keyChannel := make(chan int32, 10)
 
 	event.On(events.KeyPressed, event.ListenerFunc(player.KeyPressedSubscriber), event.Normal)
+	event.On(events.AddMessageLog, event.ListenerFunc(messageLog.AddMessageLogSubscriber), event.Normal)
 
 	go eventLoop(drawChannel, keyChannel, &player, &gameMap)
 	renderLoop(&window, keyChannel, drawChannel)
