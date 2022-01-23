@@ -5,6 +5,8 @@ import (
 )
 
 type MapConfig struct {
+	AppName string
+
 	TileSize     int
 	TileFontSize int
 
@@ -32,6 +34,7 @@ func NewMapConfig() MapConfig {
 	height := 600
 
 	return MapConfig{
+		AppName:      "Lysaris - roguelike",
 		TileSize:     20,
 		TileFontSize: 10,
 		WindowWidth:  width,

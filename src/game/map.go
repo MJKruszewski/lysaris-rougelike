@@ -1,5 +1,7 @@
 package game
 
+import "main/game/mapElements"
+
 type Map struct {
-	Tiles [][]Tile
+	Tiles [][]mapElements.TileActions
 }

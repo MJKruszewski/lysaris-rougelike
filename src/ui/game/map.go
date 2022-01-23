@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"main/config"
 	"main/game"
+	"main/game/mapElements"
 	"main/ui"
 )
 
@@ -13,6 +14,12 @@ type Map struct {
 	CurrentMap *game.Map
 	Player     *game.Player
 	window     *ui.Window
+}
+
+type drawStruct struct {
+	destX float32
+	destY float32
+	tile  *mapElements.BaseTile
 }
 
 var size = rl.Vector2{X: float32(config.GlobalConfig.TileSize), Y: float32(config.GlobalConfig.TileSize)}
@@ -35,30 +42,59 @@ func (m *Map) Draw() {
 	ySize := config.GlobalConfig.MapPanelDim.Height / config.GlobalConfig.TileSize
 
 	startRow := m.Player.X - (xSize / 2)
-	startCol := m.Player.Y - (ySize / 2)
 
-	for x := 0; x < xSize; x++ {
-		startCol = m.Player.Y - (ySize / 2)
-		for y := 0; y < ySize; y++ {
+	drawRowsChannel := make(chan drawStruct)
 
-			if startRow < 0 || startCol < 0 || startRow >= len(m.CurrentMap.Tiles) || startCol >= len(m.CurrentMap.Tiles[startRow]) {
-				startCol++
-				continue
-			}
-			tile := m.CurrentMap.Tiles[startRow][startCol]
+	go func() {
+		for x := 0; x < xSize; x++ {
+			go m.calculateColumn(drawRowsChannel, ySize, x, startRow)
 
-			destX := m.calculateXPos(x, 0)
-			destY := m.calculateYPos(y, 0)
-
-			rl.DrawRectangleV(rl.Vector2{X: destX, Y: destY}, size, tile.Color)
-			rl.DrawText(tile.Symbol, int32(destX)+textOffset, int32(destY)+textOffset, int32(config.GlobalConfig.TileFontSize), black)
-
-			startCol++
+			startRow++
 		}
-		startRow++
+	}()
+
+	for x := 0; x < xSize*ySize; x++ {
+		row := <-drawRowsChannel
+
+		if row.tile == nil {
+			continue
+		}
+
+		rl.DrawRectangleV(rl.Vector2{X: row.destX, Y: row.destY}, size, row.tile.GetColor())
+		rl.DrawText(row.tile.GetSymbol(), int32(row.destX)+textOffset, int32(row.destY)+textOffset, int32(config.GlobalConfig.TileFontSize), black)
 	}
 
 	rl.DrawText("@", int32(m.calculateXPos(xSize/2, 0))+textOffset, int32(m.calculateYPos(ySize/2, 0))+textOffset, int32(config.GlobalConfig.TileFontSize), black)
+}
+
+func (m *Map) calculateColumn(drawRowsChannel chan<- drawStruct, ySize int, x int, extStartRow int) {
+	startCol := m.Player.Y - (ySize / 2)
+	startRow := extStartRow
+	for y := 0; y < ySize; y++ {
+
+		if startRow < 0 || startCol < 0 || startRow >= len(m.CurrentMap.Tiles) || startCol >= len(m.CurrentMap.Tiles[startRow]) {
+			startCol++
+
+			drawRowsChannel <- drawStruct{
+				destX: 0,
+				destY: 0,
+				tile:  nil,
+			}
+			continue
+		}
+		tile := m.CurrentMap.Tiles[startRow][startCol]
+
+		destX := m.calculateXPos(x, 0)
+		destY := m.calculateYPos(y, 0)
+
+		drawRowsChannel <- drawStruct{
+			destX: destX,
+			destY: destY,
+			tile:  tile.GetBaseTile(),
+		}
+
+		startCol++
+	}
 }
 
 func (m *Map) calculateYPos(y int, startPosition int) float32 {

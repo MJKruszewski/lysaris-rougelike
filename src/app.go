@@ -16,7 +16,7 @@ import (
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 
-	rl.InitWindow(int32(config.GlobalConfig.WindowWidth), int32(config.GlobalConfig.WindowHeight), "raylib [core] example - basic window")
+	rl.InitWindow(int32(config.GlobalConfig.WindowWidth), int32(config.GlobalConfig.WindowHeight), config.GlobalConfig.AppName)
 
 	rl.SetTargetFPS(30)
 	rl.SetWindowMinSize(800, 600)
@@ -38,13 +38,21 @@ func main() {
 		Player:     &player,
 	})
 
+	drawChannel := make(chan bool, 10)
+	keyChannel := make(chan int32, 10)
+
 	event.On(events.KeyPressed, event.ListenerFunc(player.KeyPressedSubscriber), event.Normal)
 
+	go eventLoop(drawChannel, keyChannel, &player, &gameMap)
+	renderLoop(&window, keyChannel, drawChannel)
+}
+
+func renderLoop(window *ui2.Window, keyChannel chan int32, drawChannel chan bool) {
+	fmt.Println("Starting render loop")
 	for !rl.WindowShouldClose() {
 		resizeWindow()
 
 		rl.BeginDrawing()
-		//rl.ClearBackground(rl.Black)
 
 		for _, drawInterface := range window.GetPanels() {
 			(*drawInterface).Draw()
@@ -53,14 +61,35 @@ func main() {
 		rl.EndDrawing()
 
 		keyPressed := rl.GetKeyPressed()
-		for keyPressed > 0 {
-			event.MustFire(events.KeyPressed, event.M{"key": keyPressed, "map": gameMap})
-			keyPressed = rl.GetKeyPressed()
+		if keyPressed > 0 {
+			keyChannel <- keyPressed
+			<-drawChannel
 		}
-
 	}
+	fmt.Println("Ending render loop")
 
 	rl.CloseWindow()
+	close(keyChannel)
+}
+
+func eventLoop(out chan<- bool, in <-chan int32, player *game.Player, gameMap *game.Map) {
+	fmt.Println("Starting event loop")
+	for {
+		keyPressed, ok := <-in
+
+		if !ok {
+			fmt.Println("Stop event loop")
+
+			break
+		}
+
+		fmt.Println("Pressed key: ", keyPressed)
+		go func() {
+			event.MustFire(events.KeyPressed, event.M{"key": keyPressed, "map": *gameMap})
+		}()
+		out <- true
+	}
+	fmt.Println("Stop event loop")
 }
 
 func resizeWindow() {

@@ -23,6 +23,19 @@ func (m *BottomPanel) Draw() {
 			A: 255,
 		},
 	)
+
+	rl.DrawLine(
+		int32(config.GlobalConfig.BottomPanelDim.OffsetX),
+		int32(config.GlobalConfig.BottomPanelDim.OffsetY),
+		int32(config.GlobalConfig.BottomPanelDim.Width+config.GlobalConfig.BottomPanelDim.OffsetX),
+		int32(config.GlobalConfig.BottomPanelDim.OffsetY),
+		color.RGBA{
+			R: 250,
+			G: 197,
+			B: 40,
+			A: 255,
+		},
+	)
 }
 
 func (m *BottomPanel) SetWindow(window *ui.Window) {

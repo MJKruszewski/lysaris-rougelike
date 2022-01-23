@@ -1,4 +1,4 @@
-package game
+package menu
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -7,12 +7,12 @@ import (
 	"main/ui"
 )
 
-type LeftPanel struct {
+type MainMenu struct {
 	ui.DrawInterface
 	window *ui.Window
 }
 
-func (m *LeftPanel) Draw() {
+func (m *MainMenu) Draw() {
 	rl.DrawRectangleV(
 		rl.Vector2{X: float32(config.GlobalConfig.LeftPanelDim.OffsetX), Y: float32(config.GlobalConfig.LeftPanelDim.OffsetY)},
 		rl.Vector2{X: float32(config.GlobalConfig.LeftPanelDim.Width), Y: float32(config.GlobalConfig.LeftPanelDim.Height)},
@@ -23,21 +23,8 @@ func (m *LeftPanel) Draw() {
 			A: 255,
 		},
 	)
-
-	rl.DrawLine(
-		int32(config.GlobalConfig.LeftPanelDim.Width),
-		int32(config.GlobalConfig.LeftPanelDim.OffsetY),
-		int32(config.GlobalConfig.LeftPanelDim.Width),
-		int32(config.GlobalConfig.LeftPanelDim.Height),
-		color.RGBA{
-			R: 250,
-			G: 197,
-			B: 40,
-			A: 255,
-		},
-	)
 }
 
-func (m *LeftPanel) SetWindow(window *ui.Window) {
+func (m *MainMenu) SetWindow(window *ui.Window) {
 	m.window = window
 }
