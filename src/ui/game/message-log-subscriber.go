@@ -1,4 +1,4 @@
-package message
+package game
 
 import "github.com/gookit/event"
 
@@ -20,7 +20,10 @@ func (l *MessageLog) GetMessages() []Message {
 }
 
 func (l *MessageLog) AddMessageLogSubscriber(e event.Event) error {
-	l.AddMessage(e.Get("message").(Message))
+	l.AddMessage(Message{
+		Time:    e.Get("time").(string),
+		Content: e.Get("content").(string),
+	})
 
 	return nil
 }

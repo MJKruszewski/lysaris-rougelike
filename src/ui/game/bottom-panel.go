@@ -2,16 +2,21 @@ package game
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/gookit/event"
 	"image/color"
 	"main/config"
-	"main/game/message"
+	"main/consts"
 	"main/ui"
 )
 
 type BottomPanel struct {
 	ui.DrawInterface
 	window     *ui.Window
-	MessageLog *message.MessageLog
+	MessageLog *MessageLog
+}
+
+func (m *BottomPanel) GetName() string {
+	return consts.BottomPanel
 }
 
 func (m *BottomPanel) Draw() {
@@ -54,4 +59,12 @@ func (m *BottomPanel) Draw() {
 
 func (m *BottomPanel) SetWindow(window *ui.Window) {
 	m.window = window
+}
+
+func (m *BottomPanel) RegisterListeners() {
+	config.GameState.EventBus.On(consts.AddMessageLog, event.ListenerFunc(m.MessageLog.AddMessageLogSubscriber), event.Normal)
+}
+
+func (m *BottomPanel) RemoveListeners() {
+	config.GameState.EventBus.RemoveListeners(consts.AddMessageLog)
 }

@@ -3,9 +3,8 @@ package mapElements
 import (
 	"github.com/gookit/event"
 	"image/color"
-	"main/events"
+	"main/consts"
 	"main/game/entites"
-	"main/game/message"
 	"math/rand"
 )
 
@@ -41,10 +40,11 @@ func MakeWater(x int, y int) WaterTile {
 }
 
 func (t WaterTile) IsMovableTo(movable entites.Movable) bool {
-	event.MustFire(events.AddMessageLog, event.M{"message": message.Message{
-		Time:    "12:00",
-		Content: "You cannot swim...",
-	}})
+	//todo fix it, circular dependency with current eventbus in game singleton
+	event.MustFire(consts.AddMessageLog, event.M{
+		"time":    "12:00",
+		"content": "You cannot swim...",
+	})
 
 	return movable.IsAbleTo(entites.Swim) || movable.IsAbleTo(entites.Fly)
 }

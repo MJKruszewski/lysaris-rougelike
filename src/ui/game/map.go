@@ -2,8 +2,10 @@ package game
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/gookit/event"
 	"image/color"
 	"main/config"
+	"main/consts"
 	"main/game"
 	"main/game/mapElements"
 	"main/ui"
@@ -29,6 +31,10 @@ var black = color.RGBA{
 	G: 0,
 	B: 0,
 	A: 255,
+}
+
+func (m *Map) GetName() string {
+	return consts.Map
 }
 
 func (m *Map) Draw() {
@@ -107,4 +113,13 @@ func (m *Map) calculateXPos(x int, startPosition int) float32 {
 
 func (m *Map) SetWindow(window *ui.Window) {
 	m.window = window
+}
+
+func (m *Map) RegisterListeners() {
+	config.GameState.EventBus.On(consts.KeyPressed, event.ListenerFunc(PlayerMoveKeyPressedSubscriber), event.Normal)
+}
+
+func (m *Map) RemoveListeners() {
+	//todo remove only one listener
+	config.GameState.EventBus.RemoveListeners(consts.KeyPressed)
 }

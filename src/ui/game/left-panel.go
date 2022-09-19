@@ -4,12 +4,17 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"image/color"
 	"main/config"
+	"main/consts"
 	"main/ui"
 )
 
 type LeftPanel struct {
 	ui.DrawInterface
 	window *ui.Window
+}
+
+func (m *LeftPanel) GetName() string {
+	return consts.LeftPanel
 }
 
 func (m *LeftPanel) Draw() {
@@ -40,4 +45,10 @@ func (m *LeftPanel) Draw() {
 
 func (m *LeftPanel) SetWindow(window *ui.Window) {
 	m.window = window
+}
+
+func (m *LeftPanel) RegisterListeners() {
+}
+
+func (m *LeftPanel) RemoveListeners() {
 }
